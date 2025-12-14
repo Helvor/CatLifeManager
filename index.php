@@ -298,7 +298,8 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
             					<input type="hidden" name="action" value="delete_photo">
 				                <input type="hidden" name="photo_id" value="<?= $photo['id'] ?>">
                 			 	<input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
-				                <button type="submit"
+						<input type="hidden" name="tab" value="photos">
+						<button type="submit"
   				                    class="btn btn-danger btn-sm"
 				                    onclick="return confirm('Supprimer cette photo ?')">
 					                🗑
@@ -641,7 +642,7 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="add_photo">
                 <input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
-                
+
                 <div class="form-group">
                     <label class="form-label">Photo *</label>
                     <input type="file" name="photo" class="form-input" accept="image/*" required>
