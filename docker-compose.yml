@@ -1,0 +1,12 @@
+services:
+  catlife:
+    build: .
+    container_name: catlife-tracker
+    ports:
+      - "8000:80"
+    volumes:
+      - ./database:/var/www/html/database
+      - ./uploads:/var/www/html/uploads
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Brussels
