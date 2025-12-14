@@ -32,19 +32,6 @@ cron.schedule('0 3 * * *', () => {
   createBackup();
 });
 
-// Application
-// ===========================================
-
-app.listen(3000, '0.0.0.0', () => {
-	console.log("Server running on port 3000");
-});
-
-// Routes Default
-// ==========================================
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-});
-
 // Routes API
 // ===========================================
 
@@ -388,10 +375,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Servir le frontend pour toutes les autres routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
+  res.sendFile(path.join(__dirname, '../client/index.html'));
 });
+
+app.listen(3000, '0.0.0.0');
 
 // Démarrer le serveur
 app.listen(PORT, () => {
