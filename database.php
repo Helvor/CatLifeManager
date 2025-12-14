@@ -217,6 +217,29 @@ function addPhoto($catId, $data) {
     return $db->lastInsertId();
 }
 
+function deletePhoto($photoId) {
+    $db = getDB();
+
+    // Récupérer le nom du fichier
+    $stmt = $db->prepare("SELECT filename FROM photos WHERE id = ?");
+    $stmt->execute([$photoId]);
+    $photo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$photo) {
+        return;
+    }
+
+    // Supprimer le fichier physique
+    $filePath = UPLOAD_DIR . $photo['filename'];
+    if (file_exists($filePath)) {
+        unlink($filePath);
+    }
+
+    // Supprimer l'entrée en base
+    $stmt = $db->prepare("DELETE FROM photos WHERE id = ?");
+    $stmt->execute([$photoId]);
+}
+
 // Fonctions pour les rappels
 function getReminders($catId) {
     $db = getDB();

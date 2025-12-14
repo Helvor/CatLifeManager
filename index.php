@@ -48,7 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             header('Location: index.php?cat=' . $_POST['cat_id'] . '&tab=photos');
             exit;
-            
+        
+	case 'delete_photo':
+            deletePhoto($_POST['photo_id']);
+	    header('Location: index.php?cat=' , $_POST['cat_id'] . '&tab=photos');
+	    exit;
+
         case 'add_reminder':
             addReminder($_POST['cat_id'], $_POST);
             header('Location: index.php?cat=' . $_POST['cat_id']);
@@ -286,8 +291,19 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
                             <?php else: ?>
                                 <div class="photo-grid">
                                     <?php foreach ($photos as $photo): ?>
-                                        <div class="photo-item">
+                                        <div class="photo-item" style="position: relative;">
                                             <img src="uploads/<?= htmlspecialchars($photo['filename']) ?>" alt="<?= htmlspecialchars($photo['title']) ?>">
+					    <!-- Bouton supprimer -->
+                                            <form method="POST" style="position:absolute; top:6px; right:6px;">
+            					<input type="hidden" name="action" value="delete_photo">
+				                <input type="hidden" name="photo_id" value="<?= $photo['id'] ?>">
+                			 	<input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
+				                <button type="submit"
+  				                    class="btn btn-danger btn-sm"
+				                    onclick="return confirm('Supprimer cette photo ?')">
+					                🗑
+				                </button>
+				            </form>
                                             <div class="photo-info">
                                                 <?php if ($photo['title']): ?>
                                                     <div class="photo-title"><?= htmlspecialchars($photo['title']) ?></div>
