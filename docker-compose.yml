@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    container_name: catlife-tracker
+    ports:
+      - "3000:3000"
+      - "6000:6000"
+    volumes:
+      - ./database:/app/database
+      - ./server/uploads:/app/server/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=6000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
