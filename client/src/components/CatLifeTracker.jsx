@@ -13,7 +13,7 @@
 // }
 
 import React, { useState, useEffect } from 'react';
-import { Heart, Syringe, Weight, Camera, Calendar, PlusCircle, Bell, TrendingUp, FileText, Activity, Trash2 } from 'lucide-react';
+import { Heart, Syringe, Dumbbell, Camera, Calendar, PlusCircle, Bell, TrendingUp, FileText, Activity, Trash2 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import AddCatModal from './AddCatModal';
 import AddVaccinationModal from './AddVaccinationModal';
@@ -225,7 +225,7 @@ export default function CatLifeTracker() {
                 {weightData[weightData.length - 1]?.weight || 0} kg
               </p>
             </div>
-            <Weight className="text-blue-500" size={32} />
+            <Dumbbell className="text-blue-500" size={32} />
           </div>
         </div>
 
@@ -432,7 +432,7 @@ export default function CatLifeTracker() {
         </>
       ) : (
         <div className="bg-white rounded-xl p-12 shadow-lg text-center">
-          <Weight size={64} className="mx-auto text-gray-300 mb-4" />
+          <Dumbbell size={64} className="mx-auto text-gray-300 mb-4" />
           <p className="text-gray-400 text-lg">Aucune pesée enregistrée</p>
           <p className="text-sm text-gray-400 mt-2">Commencez à suivre le poids de {selectedCat?.name}</p>
         </div>

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  root: 'client',           // <-- indique le dossier client comme racine
   plugins: [react()],
   server: {
     port: 3000,
@@ -13,6 +14,8 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',
+    outDir: 'dist',         // dist sera dans client/dist
+    emptyOutDir: true,
   },
 });
+
