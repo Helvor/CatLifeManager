@@ -298,6 +298,15 @@ body {
     opacity: 0.9;
 }
 
+.cat-banner .btn {
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.cat-banner .btn:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
+}
+
 /* Photo Gallery */
 .photo-grid {
     display: grid;

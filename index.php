@@ -11,6 +11,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: index.php');
             exit;
             
+        case 'update_cat':
+            updateCat($_POST['cat_id'], $_POST);
+            header('Location: index.php?cat=' . $_POST['cat_id']);
+            exit;
+            
+        case 'delete_cat':
+            deleteCat($_POST['cat_id']);
+            header('Location: index.php');
+            exit;
+            
         case 'add_vaccination':
             addVaccination($_POST['cat_id'], $_POST);
             header('Location: index.php?cat=' . $_POST['cat_id'] . '&tab=health');
@@ -133,13 +143,29 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
                         <!-- Dashboard -->
                         <?php if ($selectedCat): ?>
                             <div class="cat-banner">
-                                <h1><?= htmlspecialchars($selectedCat['name']) ?> 🐱</h1>
-                                <p>
-                                    <?= htmlspecialchars($selectedCat['breed'] ?: 'Race non spécifiée') ?> • 
-                                    <?= calculateAge($selectedCat['birth_date']) ?> ans • 
-                                    <?= htmlspecialchars($selectedCat['gender']) ?>
-                                </p>
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <h1><?= htmlspecialchars($selectedCat['name']) ?> 🐱</h1>
+                                        <p>
+                                            <?= htmlspecialchars($selectedCat['breed'] ?: 'Race non spécifiée') ?> • 
+                                            <?= calculateAge($selectedCat['birth_date']) ?> ans • 
+                                            <?= htmlspecialchars($selectedCat['gender']) ?>
+                                        </p>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button onclick="showModal('editCatModal')" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white;">
+                                            ✏️ Modifier
+                                        </button>
+                                        <button onclick="if(confirm('Voulez-vous vraiment supprimer ce chat ?')) { document.getElementById('deleteCatForm').submit(); }" class="btn btn-sm btn-danger">
+                                            🗑️ Supprimer
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                            <form id="deleteCatForm" method="POST" style="display: none;">
+                                <input type="hidden" name="action" value="delete_cat">
+                                <input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
+                            </form>
 
                             <div class="stats-grid">
                                 <div class="stat-card blue">
@@ -360,6 +386,86 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
 
                 <div class="form-actions">
                     <button type="button" class="btn" onclick="hideModal('addCatModal')">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Modifier Chat -->
+    <div id="editCatModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Modifier <?= htmlspecialchars($selectedCat['name'] ?? '') ?></h2>
+                <button class="modal-close" onclick="hideModal('editCatModal')">&times;</button>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="action" value="update_cat">
+                <input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Nom *</label>
+                        <input type="text" name="name" class="form-input" value="<?= htmlspecialchars($selectedCat['name'] ?? '') ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Race</label>
+                        <input type="text" name="breed" class="form-input" value="<?= htmlspecialchars($selectedCat['breed'] ?? '') ?>">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Date de naissance</label>
+                        <input type="date" name="birth_date" class="form-input" value="<?= $selectedCat['birth_date'] ?? '' ?>">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Sexe</label>
+                        <select name="gender" class="form-select">
+                            <option value="Mâle" <?= ($selectedCat['gender'] ?? '') === 'Mâle' ? 'selected' : '' ?>>Mâle</option>
+                            <option value="Femelle" <?= ($selectedCat['gender'] ?? '') === 'Femelle' ? 'selected' : '' ?>>Femelle</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Couleur</label>
+                        <input type="text" name="color" class="form-input" value="<?= htmlspecialchars($selectedCat['color'] ?? '') ?>">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">N° puce</label>
+                        <input type="text" name="microchip_number" class="form-input" value="<?= htmlspecialchars($selectedCat['microchip_number'] ?? '') ?>">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-checkbox">
+                        <input type="checkbox" name="is_neutered" value="1" <?= ($selectedCat['is_neutered'] ?? 0) ? 'checked' : '' ?>>
+                        <span>Stérilisé(e)</span>
+                    </label>
+                </div>
+
+                <h3 style="margin: 24px 0 16px;">Vétérinaire</h3>
+
+                <div class="form-group">
+                    <label class="form-label">Clinique</label>
+                    <input type="text" name="vet_clinic" class="form-input" value="<?= htmlspecialchars($selectedCat['vet_clinic'] ?? '') ?>">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Téléphone</label>
+                        <input type="tel" name="vet_phone" class="form-input" value="<?= htmlspecialchars($selectedCat['vet_phone'] ?? '') ?>">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="vet_email" class="form-input" value="<?= htmlspecialchars($selectedCat['vet_email'] ?? '') ?>">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="hideModal('editCatModal')">Annuler</button>
                     <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </div>
             </form>

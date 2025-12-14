@@ -133,6 +133,30 @@ function addCat($data) {
     return $db->lastInsertId();
 }
 
+function updateCat($id, $data) {
+    $db = getDB();
+    $stmt = $db->prepare("UPDATE cats SET name = ?, breed = ?, birth_date = ?, gender = ?, color = ?, is_neutered = ?, microchip_number = ?, vet_clinic = ?, vet_phone = ?, vet_email = ? WHERE id = ?");
+    $stmt->execute([
+        $data['name'],
+        $data['breed'],
+        $data['birth_date'],
+        $data['gender'],
+        $data['color'],
+        $data['is_neutered'] ?? 0,
+        $data['microchip_number'],
+        $data['vet_clinic'],
+        $data['vet_phone'],
+        $data['vet_email'],
+        $id
+    ]);
+}
+
+function deleteCat($id) {
+    $db = getDB();
+    $stmt = $db->prepare("DELETE FROM cats WHERE id = ?");
+    $stmt->execute([$id]);
+}
+
 // Fonctions pour les vaccinations
 function getVaccinations($catId) {
     $db = getDB();
