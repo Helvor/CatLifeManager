@@ -21,7 +21,7 @@ app.use(fileUpload({
 
 // Servir les fichiers statiques
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(path.join(__dirname, '../dist')));
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Initialiser la base de données
 initDatabase();
@@ -42,7 +42,7 @@ app.listen(3000, '0.0.0.0', () => {
 // Routes Default
 // ==========================================
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/index.html'));
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 // Routes API

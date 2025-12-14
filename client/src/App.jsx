@@ -1,5 +1,5 @@
 import React from 'react';
-import CatLifeTracker from './components/CatLifeTracker';
+import CatLifeTracker from './components/CatLifeTracker.jsx';
 
 function App() {
   return <CatLifeTracker />;
