@@ -27,8 +27,12 @@ RUN mkdir -p /var/www/html/uploads /var/www/html/database /var/www/html/icons \
 # Générer les icônes PWA (manifest + iOS apple-touch-icon)
 RUN php /var/www/html/scripts/generate_icons.php
 
+# Script d'entrypoint : corrige les permissions des volumes bind-mount au démarrage
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Exposer le port 80
 EXPOSE 80
 
-# Démarrer Apache en premier plan
-CMD ["apache2-foreground"]
+# Entrypoint : fixe les permissions puis démarre Apache
+ENTRYPOINT ["docker-entrypoint.sh"]
