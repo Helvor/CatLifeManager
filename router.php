@@ -34,15 +34,34 @@ switch ($action) {
         exit;
 
     case 'add_photo':
-        if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-            $filename = time() . '_' . basename($_FILES['photo']['name']);
+        $uploadError = null;
+        if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
+            $phpErrors = [
+                UPLOAD_ERR_INI_SIZE   => 'Le fichier dépasse la limite du serveur (upload_max_filesize).',
+                UPLOAD_ERR_FORM_SIZE  => 'Le fichier dépasse la limite du formulaire.',
+                UPLOAD_ERR_PARTIAL    => 'Le fichier n\'a été que partiellement reçu.',
+                UPLOAD_ERR_NO_FILE    => 'Aucun fichier sélectionné.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Dossier temporaire manquant.',
+                UPLOAD_ERR_CANT_WRITE => 'Impossible d\'écrire le fichier sur le disque.',
+                UPLOAD_ERR_EXTENSION  => 'Upload bloqué par une extension PHP.',
+            ];
+            $code = $_FILES['photo']['error'] ?? -1;
+            $uploadError = $phpErrors[$code] ?? 'Erreur inconnue (code ' . $code . ').';
+        } else {
+            $filename  = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($_FILES['photo']['name']));
             $uploadPath = UPLOAD_DIR . $filename;
             if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadPath)) {
                 $_POST['filename'] = $filename;
                 addPhoto((int) $_POST['cat_id'], $_POST);
+            } else {
+                $uploadError = 'move_uploaded_file() a échoué — vérifiez les permissions du dossier uploads/.';
             }
         }
-        header('Location: index.php?cat=' . (int) $_POST['cat_id'] . '&tab=photos');
+        $redirect = 'index.php?cat=' . (int) $_POST['cat_id'] . '&tab=photos';
+        if ($uploadError) {
+            $redirect .= '&upload_error=' . urlencode($uploadError);
+        }
+        header('Location: ' . $redirect);
         exit;
 
     case 'delete_photo':

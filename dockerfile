@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
 # Activer mod_rewrite pour Apache
 RUN a2enmod rewrite
 
+# Configuration PHP (limites upload)
+COPY php.ini /usr/local/etc/php/conf.d/catlife.ini
+
 # Copier les fichiers de l'application
 COPY . /var/www/html/
 
