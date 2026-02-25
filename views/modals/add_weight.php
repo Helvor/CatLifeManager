@@ -1,5 +1,6 @@
 <div id="addWeightModal" class="modal">
     <div class="modal-content">
+        <span class="modal-handle"></span>
         <div class="modal-header">
             <h2 class="modal-title">Ajouter une pesée</h2>
             <button class="modal-close" onclick="hideModal('addWeightModal')">&times;</button>

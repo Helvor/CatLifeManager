@@ -1,7 +1,8 @@
 <div id="addCatModal" class="modal">
     <div class="modal-content">
+        <span class="modal-handle"></span>
         <div class="modal-header">
-            <h2 class="modal-title">Ajouter un nouveau chat</h2>
+            <h2 class="modal-title">Ajouter un chat</h2>
             <button class="modal-close" onclick="hideModal('addCatModal')">&times;</button>
         </div>
         <form method="POST">
@@ -50,7 +51,7 @@
                 </label>
             </div>
 
-            <h3 style="margin: 24px 0 16px;">Vétérinaire</h3>
+            <div class="modal-section-title">Vétérinaire</div>
 
             <div class="form-group">
                 <label class="form-label">Clinique</label>
