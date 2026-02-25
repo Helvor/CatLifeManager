@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
 	case 'delete_photo':
             deletePhoto($_POST['photo_id']);
-	    header('Location: index.php?cat=' , $_POST['cat_id'] . '&tab=photos');
+	    header('Location: index.php?cat=' . $_POST['cat_id'] . '&tab=photos');
 	    exit;
 
         case 'add_reminder':
@@ -169,7 +169,7 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
                             </div>
                             <form id="deleteCatForm" method="POST" style="display: none;">
                                 <input type="hidden" name="action" value="delete_cat">
-                                <input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
+                                <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
                             </form>
 
                             <div class="stats-grid">
@@ -206,7 +206,7 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
                                                 <form method="POST" style="display: inline;">
                                                     <input type="hidden" name="action" value="complete_reminder">
                                                     <input type="hidden" name="reminder_id" value="<?= $reminder['id'] ?>">
-                                                    <input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
+                                                    <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
                                                     <button type="submit" class="btn btn-sm btn-success">Fait</button>
                                                 </form>
                                             </div>
@@ -418,7 +418,7 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
             </div>
             <form method="POST">
                 <input type="hidden" name="action" value="update_cat">
-                <input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
+                <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
                 
                 <div class="form-row">
                     <div class="form-group">
@@ -498,7 +498,7 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
             </div>
             <form method="POST">
                 <input type="hidden" name="action" value="add_vaccination">
-                <input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
+                <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
                 
                 <div class="form-group">
                     <label class="form-label">Type de vaccin *</label>
@@ -550,7 +550,7 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
             </div>
             <form method="POST">
                 <input type="hidden" name="action" value="add_treatment">
-                <input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
+                <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
                 
                 <div class="form-group">
                     <label class="form-label">Type de traitement *</label>
@@ -607,7 +607,7 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
             </div>
             <form method="POST">
                 <input type="hidden" name="action" value="add_weight">
-                <input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
+                <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
                 
                 <div class="form-group">
                     <label class="form-label">Poids (kg) *</label>
@@ -641,7 +641,7 @@ $reminders = $selectedCatId ? getReminders($selectedCatId) : [];
             </div>
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="add_photo">
-                <input type="hidden" name="cat_id" value="<?= $selectedCatId ?>">
+                <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
 
                 <div class="form-group">
                     <label class="form-label">Photo *</label>
