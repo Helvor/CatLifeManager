@@ -1,0 +1,28 @@
+# Caddyfile — used by docker-compose.https.yml for automatic HTTPS
+#
+# For production: set APP_DOMAIN in your environment
+# For local dev with HTTPS: set APP_DOMAIN=localhost (uses Caddy's local CA)
+#
+# Usage:
+#   APP_DOMAIN=catlife.example.com docker-compose -f docker-compose.yml -f docker-compose.https.yml up
+
+{$APP_DOMAIN} {
+    # Automatically provisions a TLS certificate (Let's Encrypt in prod,
+    # local CA for localhost)
+    reverse_proxy app:80
+
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    # Cache static assets aggressively
+    @static path /icons/* /style.css /sw.js /manifest.json
+    header @static Cache-Control "public, max-age=31536000, immutable"
+
+    # Compress responses
+    encode gzip
+}

@@ -494,3 +494,26 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* ============================================================
+   PWA / iOS Safe Area
+   Ensures content is not hidden behind the iPhone notch,
+   Dynamic Island, or home indicator when installed as a PWA.
+   env() values are 0 on non-iOS devices, so this is harmless.
+   ============================================================ */
+.header {
+    /* Push header content below the status bar / Dynamic Island */
+    padding-top: calc(20px + env(safe-area-inset-top));
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+.main-container {
+    /* Prevent content from sliding under the home indicator */
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.modal-content {
+    /* Keep modals within safe bounds on notched iPhones */
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
