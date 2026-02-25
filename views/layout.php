@@ -2,8 +2,24 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatLife Tracker 🐱</title>
+    <!-- viewport-fit=cover is required for iOS safe-area-inset support -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CatLife Tracker</title>
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6c5ce7">
+
+    <!-- iOS PWA support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CatLife">
+
+    <!-- iOS app icons (Safari ignores the manifest for apple-touch-icon) -->
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120.png">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -58,6 +74,11 @@
                 }
             });
         });
+
+        // Register service worker for PWA / offline support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
     </script>
 </body>
 </html>
