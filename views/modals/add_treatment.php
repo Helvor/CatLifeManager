@@ -1,5 +1,6 @@
 <div id="addTreatmentModal" class="modal">
     <div class="modal-content">
+        <span class="modal-handle"></span>
         <div class="modal-header">
             <h2 class="modal-title">Ajouter un traitement</h2>
             <button class="modal-close" onclick="hideModal('addTreatmentModal')">&times;</button>

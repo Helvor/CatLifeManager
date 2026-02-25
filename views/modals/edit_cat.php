@@ -1,5 +1,6 @@
 <div id="editCatModal" class="modal">
     <div class="modal-content">
+        <span class="modal-handle"></span>
         <div class="modal-header">
             <h2 class="modal-title">Modifier <?= htmlspecialchars($selectedCat['name'] ?? '') ?></h2>
             <button class="modal-close" onclick="hideModal('editCatModal')">&times;</button>
