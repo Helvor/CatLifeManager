@@ -1,0 +1,34 @@
+# HTTPS override for docker-compose
+#
+# Use this file on top of the base docker-compose.yml to add
+# automatic HTTPS via Caddy (required for PWA install on iOS).
+#
+# Production:
+#   APP_DOMAIN=catlife.example.com docker-compose -f docker-compose.yml -f docker-compose.https.yml up -d
+#
+# Local dev with HTTPS (adds Caddy's local CA to your trust store):
+#   APP_DOMAIN=localhost docker-compose -f docker-compose.yml -f docker-compose.https.yml up
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - APP_DOMAIN=${APP_DOMAIN:-localhost}
+    depends_on:
+      - catlife
+
+  catlife:
+    # Remove the direct port mapping — traffic goes through Caddy instead
+    ports: !reset []
+
+volumes:
+  caddy_data:
+  caddy_config:
