@@ -7,6 +7,7 @@
         </div>
         <form method="POST">
             <input type="hidden" name="action" value="add_cat">
+            <?= csrfInput() ?>
 
             <div class="form-row">
                 <div class="form-group">

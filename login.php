@@ -1,0 +1,118 @@
+<?php
+require_once 'config.php';
+require_once 'auth.php';
+require_once 'database.php';
+
+// Déjà connecté → app
+if (currentUser()) {
+    header('Location: /index.php');
+    exit;
+}
+
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrfToken($_POST['_token'] ?? '')) {
+        $error = 'Requête invalide. Veuillez réessayer.';
+    } else {
+        $email    = trim(strtolower($_POST['email'] ?? ''));
+        $password = $_POST['password'] ?? '';
+        $ip       = $_SERVER['REMOTE_ADDR'];
+
+        if (countRecentFailedAttempts($email, $ip) >= 5) {
+            $error = 'Trop de tentatives de connexion. Réessayez dans 15 minutes.';
+        } else {
+            $user = getUserByEmail($email);
+            if ($user && $user['password_hash'] && password_verify($password, $user['password_hash'])) {
+                logLoginAttempt($email, $ip, true);
+                loginUser($user);
+                header('Location: /index.php');
+                exit;
+            } else {
+                logLoginAttempt($email, $ip, false);
+                $error = 'Email ou mot de passe incorrect.';
+            }
+        }
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="fr" data-theme="system">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Connexion — CatLife Manager</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6c5ce7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>(function(){const s=localStorage.getItem('theme');if(s)document.documentElement.dataset.theme=s;})()</script>
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 7.65l8.42 8.42 8.42-8.42a5.4 5.4 0 0 0 0-7.65z"/>
+                    </svg>
+                </div>
+                <span class="logo-text">CatLife</span>
+            </div>
+
+            <h1 class="auth-title">Connexion</h1>
+            <p class="auth-subtitle">Bienvenue ! Connectez-vous pour accéder à vos chats.</p>
+
+            <?php if ($error): ?>
+                <div class="auth-error">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST" class="auth-form">
+                <?= csrfInput() ?>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Adresse email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-input"
+                        value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                        autocomplete="email"
+                        required
+                        autofocus
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Mot de passe</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-input"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    Se connecter
+                </button>
+            </form>
+
+            <p class="auth-switch">
+                Pas encore de compte ?
+                <a href="/register.php">Créer un compte</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

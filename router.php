@@ -1,9 +1,16 @@
 <?php
 
+// Vérification CSRF pour toutes les actions POST
+if (!verifyCsrfToken($_POST['_token'] ?? '')) {
+    http_response_code(403);
+    die('Requête invalide (CSRF). Veuillez recharger la page et réessayer.');
+}
+
 $action = $_POST['action'] ?? '';
 
 switch ($action) {
     case 'add_cat':
+        $_POST['user_id'] = $currentUser['id'];
         addCat($_POST);
         header('Location: index.php');
         exit;

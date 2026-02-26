@@ -8,6 +8,7 @@
         <form method="POST">
             <input type="hidden" name="action" value="update_cat">
             <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
+            <?= csrfInput() ?>
 
             <div class="form-row">
                 <div class="form-group">
