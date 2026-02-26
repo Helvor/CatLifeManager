@@ -1,7 +1,7 @@
 # CatLife Manager — Product Roadmap
 
 > Last updated: 2026-02-26
-> Current version: 0.4
+> Current version: 0.5
 > Stack: PHP 8.2 · SQLite · Vanilla JS · Custom CSS
 
 ---
@@ -53,9 +53,9 @@ Meta viewport `viewport-fit=cover` + `env(safe-area-inset-*)` dans `style.css`.
 
 ---
 
-## ✅ Phase 2 — Authentication
+## ⚠️ Phase 2 — Authentication
 
-**Statut : Email/password complète (OAuth prévu en phase suivante)**
+**Statut : Email/password partielle (mot de passe oublié manquant) · OAuth prévu**
 
 **Goal:** Secure the app with multi-user support and three sign-in methods.
 
@@ -102,15 +102,17 @@ function requireAuth(): void {
 
 Add `requireAuth()` at the top of `index.php`.
 
-### ✅ 2.3 Email / Password Authentication
+### ⚠️ 2.3 Email / Password Authentication
 
-- Hash passwords with `password_hash($pass, PASSWORD_ARGON2ID)`
-- Verify with `password_verify()`
-- Add a CSRF token to every form (one hidden `<input name="_token">`)
-- Rate-limit login attempts (track in a `login_attempts` table)
-- Add a "Forgot password" flow with a time-limited token sent by email
+- ✅ Hash passwords with `password_hash($pass, PASSWORD_ARGON2ID)`
+- ✅ Verify with `password_verify()` (avec protection timing-attack)
+- ✅ CSRF token sur tous les formulaires POST
+- ✅ Rate-limit sur les tentatives de connexion (table `login_attempts`, blocage 15 min après 5 échecs)
+- ✅ Rate-limit sur l'inscription (5 inscriptions/IP/heure)
+- ❌ Flow "Mot de passe oublié" (lien à durée limitée par email) — non implémenté
+- ❌ Vérification d'email à l'inscription — non implémentée
 
-Recommended library: `PHPMailer/PHPMailer` for transactional email.
+Recommended library pour l'envoi : `PHPMailer/PHPMailer` ou un service tiers (Resend, Brevo).
 
 ### ❌ 2.4 Google OAuth 2.0
 
@@ -222,26 +224,12 @@ Remplacement des emoji par des icônes Lucide SVG dans toute l'interface.
 
 **Statut : Partielle**
 
-### ❌ 4.1 Async Form Submissions (No Page Reloads)
+### ✅ 4.1 Async Form Submissions (No Page Reloads)
 
-Les formulaires utilisent encore des POST avec redirection complète.
-À convertir avec `fetch()` :
-
-```js
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const res = await fetch(form.action, {
-    method: 'POST',
-    body: new FormData(form)
-  });
-  const { ok, message } = await res.json();
-  toast(message, ok ? 'success' : 'error');
-  if (ok) { modal.close(); refreshSection(); }
-});
-```
-
-Mettre à jour `router.php` pour retourner du JSON si
-`Accept: application/json` est présent.
+`async-forms.js` (100 lignes) implémenté — tous les formulaires `<form data-async>`
+sont soumis via `fetch()`. Le header `X-Requested-With: fetch` est détecté par
+`router.php` qui retourne du JSON `{ success, message, redirect }`.
+Toast affiché en cas de succès ou d'erreur, modal fermée automatiquement.
 
 ### ❌ 4.2 Health Record Export (PDF)
 
@@ -310,23 +298,13 @@ Remplacer la grille photo simple par :
 
 **Statut : Partielle**
 
-### ✅ 5.2 Docker Improvements (Caddy)
+### ✅ 5.1 Introduce Composer
 
-`Caddyfile` + `docker-compose.https.yml` avec reverse proxy Caddy pour
-HTTPS automatique.
+`composer.json` et `composer.lock` en place. `vlucas/phpdotenv` installé et
+utilisé dans `config.php`. Fichier `.env.example` fourni avec toutes les
+variables prévues (Google OAuth, Apple Sign In, SMTP).
 
-### ❌ 5.1 Introduce Composer
-
-```bash
-composer require league/oauth2-google
-composer require league/oauth2-client
-composer require firebase/php-jwt
-composer require phpmailer/phpmailer
-composer require dompdf/dompdf
-composer require vlucas/phpdotenv
-```
-
-Move credentials to `.env` (managed by `phpdotenv`):
+Variables `.env` prévues :
 
 ```
 APP_URL=https://catlife.example.com
@@ -342,15 +320,30 @@ SMTP_USER=...
 SMTP_PASS=...
 ```
 
-### ❌ 5.3 Security Hardening
+Dépendances restantes à installer selon les features activées :
 
-- [ ] Add CSRF token middleware for all POST forms
-- [ ] Set `SameSite=Lax; Secure; HttpOnly` on session cookie
-- [ ] Move database out of webroot
-- [ ] Add Content-Security-Policy header
-- [ ] Validate and sanitize file upload MIME type (not just extension)
-- [ ] Add rate limiting on auth endpoints (IP-based, tracked in SQLite)
-- [ ] Log auth events (logins, failures, password resets)
+```bash
+composer require league/oauth2-google   # OAuth 2.4
+composer require firebase/php-jwt        # API 4.4
+composer require phpmailer/phpmailer     # Email reminders 4.3
+composer require dompdf/dompdf           # PDF export 4.2
+```
+
+### ✅ 5.2 Docker Improvements (Caddy)
+
+`Caddyfile` + `docker-compose.https.yml` avec reverse proxy Caddy pour
+HTTPS automatique.
+
+### ⚠️ 5.3 Security Hardening
+
+- [x] CSRF token sur tous les formulaires POST
+- [x] `SameSite=Lax; Secure; HttpOnly` sur le cookie de session
+- [x] Content-Security-Policy header (via `Caddyfile` + `config.php`)
+- [x] Rate limiting sur les endpoints auth (IP-based, table `login_attempts`)
+- [x] Log des événements auth (connexions, échecs)
+- [x] Base de données protégée via Caddyfile (accès direct bloqué)
+- [ ] Validation du MIME type des uploads (pas seulement l'extension)
+- [ ] Tests de pénétration / audit des en-têtes CSP (nonce-based)
 
 ### ❌ 5.4 Testing
 
@@ -371,43 +364,45 @@ Introduce a basic test suite with PHPUnit:
 | 4 | Toast notifications | ✅ Fait | Low | High |
 | 5 | Weight chart | ✅ Fait | Low | Medium |
 | 6 | **Email authentication** | ✅ Fait | Medium | High |
-| 7 | **Composer + .env** | ❌ À faire | Low | High |
-| 8 | **Google OAuth** | ❌ À faire | Medium | High |
-| 9 | **Apple Sign In** | ❌ À faire | Medium | Requis iOS |
-| 10 | **Async forms (fetch)** | ❌ À faire | Medium | High |
-| 11 | **Security hardening (CSRF, etc.)** | ❌ À faire | Medium | Critique |
-| 12 | Photo lightbox & swipe | ❌ À faire | Low | Medium |
-| 13 | PDF export carnet de santé | ❌ À faire | Low | Medium |
-| 14 | Email reminders (cron) | ❌ À faire | Medium | Medium |
-| 15 | REST API + JWT | ❌ À faire | High | Medium |
-| 16 | Multi-cat quick switcher | ❌ À faire | Low | Medium |
-| 17 | QR code partageable | ❌ À faire | Low | Medium |
-| 18 | Tests (PHPUnit + Playwright) | ❌ À faire | High | Élevé |
+| 7 | **Composer + .env** | ✅ Fait | Low | High |
+| 8 | **Async forms (fetch)** | ✅ Fait | Medium | High |
+| 9 | **Security hardening (CSRF, rate limit, headers)** | ⚠️ Partiel | Medium | Critique |
+| 10 | **Mot de passe oublié / vérif. email** | ❌ À faire | Medium | High |
+| 11 | **Google OAuth** | ❌ À faire | Medium | High |
+| 12 | **Apple Sign In** | ❌ À faire | Medium | Requis iOS |
+| 13 | Photo lightbox & swipe | ❌ À faire | Low | Medium |
+| 14 | Validation MIME upload | ❌ À faire | Low | Critique |
+| 15 | PDF export carnet de santé | ❌ À faire | Low | Medium |
+| 16 | Email reminders (cron) | ❌ À faire | Medium | Medium |
+| 17 | REST API + JWT | ❌ À faire | High | Medium |
+| 18 | Multi-cat quick switcher | ❌ À faire | Low | Medium |
+| 19 | QR code partageable | ❌ À faire | Low | Medium |
+| 20 | Tests (PHPUnit + Playwright) | ❌ À faire | High | Élevé |
 
 ---
 
-## Prochaines étapes immédiates (v0.4)
+## Prochaines étapes immédiates (v0.5)
 
 Les 3 tâches à traiter en priorité :
 
-### 1. Introduire Composer & `.env`
+### 1. Validation MIME des uploads
 
-Installer Composer dans le Dockerfile et ajouter `vlucas/phpdotenv`.
-Déplacer toutes les constantes hardcodées (`DB_PATH`, futurs tokens OAuth)
-vers un fichier `.env` ignoré par git.
+Ajouter dans `router.php` / la logique d'upload une vérification du type MIME
+réel du fichier (avec `finfo_file()`) et non seulement de l'extension déclarée.
+Rejeter tout fichier non-image avant de l'écrire dans `/uploads/`.
 
-### 2. Authentification email/password
+### 2. Connexion Google OAuth 2.0
 
-- Créer la table `users` dans `database.php`
-- Ajouter `auth.php` avec `requireAuth()` / `currentUser()`
-- Créer `views/pages/login.php` et `views/pages/register.php`
-- Brancher `requireAuth()` dans `index.php`
-- Ajouter un token CSRF à tous les formulaires POST
+- `composer require league/oauth2-google`
+- Créer `/auth/callback/google.php`
+- Ajouter le bouton "Continuer avec Google" dans `login.php` et `register.php`
+- Configurer les URIs de redirection dans Google Cloud Console
 
-### 3. Soumissions de formulaires async (fetch)
+### 3. Mot de passe oublié
 
-Convertir les modals en fetch + JSON pour supprimer les rechargements complets.
-Mettre à jour `router.php` pour retourner du JSON en plus des redirections.
+- Générer un token `bin2hex(random_bytes(32))` valable 1 heure, stocké en base
+- Envoyer un lien par email via un service tiers (Resend, Brevo) ou PHPMailer
+- Page `/reset-password.php` pour définir un nouveau mot de passe
 
 ---
 
