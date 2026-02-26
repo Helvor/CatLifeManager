@@ -1,0 +1,16 @@
+{
+    "name": "helvor/catlife-manager",
+    "description": "CatLife Manager — application de gestion de la vie de vos chats",
+    "type": "project",
+    "require": {
+        "php": ">=8.2",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {}
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

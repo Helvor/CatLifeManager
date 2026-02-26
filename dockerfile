@@ -6,10 +6,14 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_sqlite gd \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Installer Composer
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 # Activer mod_rewrite pour Apache
 RUN a2enmod rewrite
@@ -19,6 +23,10 @@ COPY php.ini /usr/local/etc/php/conf.d/catlife.ini
 
 # Copier les fichiers de l'application
 COPY . /var/www/html/
+
+# Installer les dépendances Composer (sans les dev)
+WORKDIR /var/www/html
+RUN composer install --no-dev --no-interaction --optimize-autoloader
 
 # Créer les dossiers nécessaires et donner les permissions
 RUN mkdir -p /var/www/html/uploads /var/www/html/database /var/www/html/icons \
