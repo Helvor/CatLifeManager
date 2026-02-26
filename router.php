@@ -1,7 +1,32 @@
 <?php
 
+// ─── Async request helpers ────────────────────────────────────────────────────
+
+function isAsyncRequest(): bool
+{
+    return ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
+}
+
+function jsonSuccess(string $message, string $redirect = ''): never
+{
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['success' => true, 'message' => $message, 'redirect' => $redirect]);
+    exit;
+}
+
+function jsonError(string $error, int $status = 400): never
+{
+    http_response_code($status);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['success' => false, 'error' => $error]);
+    exit;
+}
+
 // ─── CSRF ────────────────────────────────────────────────────────────────────
 if (!verifyCsrfToken($_POST['_token'] ?? '')) {
+    if (isAsyncRequest()) {
+        jsonError('Requête invalide (CSRF). Veuillez recharger la page.', 403);
+    }
     http_response_code(403);
     die('Requête invalide (CSRF). Veuillez recharger la page et réessayer.');
 }
@@ -16,6 +41,9 @@ function assertCatOwnership(int $catId): void
 {
     global $currentUser;
     if ($catId <= 0 || !catBelongsToUser($catId, $currentUser['id'])) {
+        if (isAsyncRequest()) {
+            jsonError('Accès refusé.', 403);
+        }
         http_response_code(403);
         die('Accès refusé : ce chat ne vous appartient pas.');
     }
@@ -27,36 +55,54 @@ switch ($action) {
     case 'add_cat':
         $_POST['user_id'] = $currentUser['id'];
         addCat($_POST);
+        if (isAsyncRequest()) {
+            jsonSuccess('Chat ajouté avec succès !', 'index.php');
+        }
         header('Location: index.php');
         exit;
 
     case 'update_cat':
         assertCatOwnership((int) $_POST['cat_id']);
         updateCat((int) $_POST['cat_id'], $_POST);
+        if (isAsyncRequest()) {
+            jsonSuccess('Profil mis à jour !', 'index.php?cat=' . (int) $_POST['cat_id']);
+        }
         header('Location: index.php?cat=' . (int) $_POST['cat_id']);
         exit;
 
     case 'delete_cat':
         assertCatOwnership((int) $_POST['cat_id']);
         deleteCat((int) $_POST['cat_id']);
+        if (isAsyncRequest()) {
+            jsonSuccess('Chat supprimé.', 'index.php');
+        }
         header('Location: index.php');
         exit;
 
     case 'add_vaccination':
         assertCatOwnership((int) $_POST['cat_id']);
         addVaccination((int) $_POST['cat_id'], $_POST);
+        if (isAsyncRequest()) {
+            jsonSuccess('Vaccination ajoutée !', 'index.php?cat=' . (int) $_POST['cat_id'] . '&tab=health');
+        }
         header('Location: index.php?cat=' . (int) $_POST['cat_id'] . '&tab=health');
         exit;
 
     case 'add_treatment':
         assertCatOwnership((int) $_POST['cat_id']);
         addTreatment((int) $_POST['cat_id'], $_POST);
+        if (isAsyncRequest()) {
+            jsonSuccess('Traitement ajouté !', 'index.php?cat=' . (int) $_POST['cat_id'] . '&tab=health');
+        }
         header('Location: index.php?cat=' . (int) $_POST['cat_id'] . '&tab=health');
         exit;
 
     case 'add_weight':
         assertCatOwnership((int) $_POST['cat_id']);
         addWeight((int) $_POST['cat_id'], $_POST);
+        if (isAsyncRequest()) {
+            jsonSuccess('Pesée enregistrée !', 'index.php?cat=' . (int) $_POST['cat_id'] . '&tab=weight');
+        }
         header('Location: index.php?cat=' . (int) $_POST['cat_id'] . '&tab=weight');
         exit;
 
@@ -115,7 +161,12 @@ switch ($action) {
 
         $redirect = 'index.php?cat=' . (int) $_POST['cat_id'] . '&tab=photos';
         if ($uploadError) {
+            if (isAsyncRequest()) {
+                jsonError($uploadError);
+            }
             $redirect .= '&upload_error=' . urlencode($uploadError);
+        } elseif (isAsyncRequest()) {
+            jsonSuccess('Photo ajoutée !', $redirect);
         }
         header('Location: ' . $redirect);
         exit;
@@ -124,22 +175,34 @@ switch ($action) {
         assertCatOwnership((int) $_POST['cat_id']);
         // Double vérification IDOR : la photo appartient bien au chat de l'utilisateur
         if (!photoBelongsToUser((int) $_POST['photo_id'], $currentUser['id'])) {
+            if (isAsyncRequest()) {
+                jsonError('Accès refusé.', 403);
+            }
             http_response_code(403);
             die('Accès refusé.');
         }
         deletePhoto((int) $_POST['photo_id']);
+        if (isAsyncRequest()) {
+            jsonSuccess('Photo supprimée.', 'index.php?cat=' . (int) $_POST['cat_id'] . '&tab=photos');
+        }
         header('Location: index.php?cat=' . (int) $_POST['cat_id'] . '&tab=photos');
         exit;
 
     case 'add_reminder':
         assertCatOwnership((int) $_POST['cat_id']);
         addReminder((int) $_POST['cat_id'], $_POST);
+        if (isAsyncRequest()) {
+            jsonSuccess('Rappel créé !', 'index.php?cat=' . (int) $_POST['cat_id']);
+        }
         header('Location: index.php?cat=' . (int) $_POST['cat_id']);
         exit;
 
     case 'complete_reminder':
         assertCatOwnership((int) $_POST['cat_id']);
         completeReminder((int) $_POST['reminder_id']);
+        if (isAsyncRequest()) {
+            jsonSuccess('Rappel complété !', 'index.php?cat=' . (int) $_POST['cat_id']);
+        }
         header('Location: index.php?cat=' . (int) $_POST['cat_id']);
         exit;
 }

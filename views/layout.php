@@ -163,5 +163,6 @@
             navigator.serviceWorker.register('/sw.js');
         }
     </script>
+    <script src="/async-forms.js"></script>
 </body>
 </html>

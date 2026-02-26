@@ -5,7 +5,7 @@
             <h2 class="modal-title">Modifier <?= htmlspecialchars($selectedCat['name'] ?? '') ?></h2>
             <button class="modal-close" onclick="hideModal('editCatModal')">&times;</button>
         </div>
-        <form method="POST">
+        <form method="POST" data-async>
             <input type="hidden" name="action" value="update_cat">
             <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
             <?= csrfInput() ?>

@@ -5,7 +5,7 @@
             <h2 class="modal-title">Ajouter une pesée</h2>
             <button class="modal-close" onclick="hideModal('addWeightModal')">&times;</button>
         </div>
-        <form method="POST">
+        <form method="POST" data-async>
             <input type="hidden" name="action" value="add_weight">
             <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
             <?= csrfInput() ?>
