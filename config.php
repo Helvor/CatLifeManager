@@ -39,3 +39,19 @@ if (APP_ENV === 'development') {
     ini_set('display_errors', 0);
     error_reporting(0);
 }
+
+// ─── Security headers (fallback si Caddy n'est pas devant l'app) ───────────
+// Caddy les pose en production via Caddyfile. On les ajoute ici pour le dev HTTP.
+if (!headers_sent()) {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    // CSP avec unsafe-inline obligatoire pour les onclick/style inline existants.
+    // À durcir (nonce ou externalisation JS) dans une prochaine itération.
+    header("Content-Security-Policy: default-src 'self'; "
+        . "script-src 'self' 'unsafe-inline'; "
+        . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        . "font-src 'self' https://fonts.gstatic.com; "
+        . "img-src 'self' data: blob:; "
+        . "connect-src 'self'");
+}

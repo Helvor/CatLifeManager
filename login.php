@@ -17,13 +17,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $email    = trim(strtolower($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
-        $ip       = $_SERVER['REMOTE_ADDR'];
+        $ip       = getClientIp();
 
         if (countRecentFailedAttempts($email, $ip) >= 5) {
             $error = 'Trop de tentatives de connexion. Réessayez dans 15 minutes.';
         } else {
             $user = getUserByEmail($email);
-            if ($user && $user['password_hash'] && password_verify($password, $user['password_hash'])) {
+
+            // Protection timing attack : toujours appeler password_verify,
+            // même si l'utilisateur n'existe pas, pour masquer les emails enregistrés.
+            $hashToVerify  = ($user && $user['password_hash']) ? $user['password_hash'] : getDummyHash();
+            $passwordMatch = password_verify($password, $hashToVerify);
+            $validLogin    = $user && $user['password_hash'] && $passwordMatch;
+
+            if ($validLogin) {
                 logLoginAttempt($email, $ip, true);
                 loginUser($user);
                 header('Location: /index.php');

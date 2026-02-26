@@ -9,14 +9,31 @@
 {$APP_DOMAIN} {
     # Automatically provisions a TLS certificate (Let's Encrypt in prod,
     # local CA for localhost)
+
+    # ── Blocages de sécurité (évalués avant le reverse_proxy) ─────────────
+
+    # Bloquer l'accès direct à la base de données SQLite
+    @database path /database /database/*
+    respond @database 403
+
+    # Bloquer les fichiers PHP dans uploads/ (protection webshell)
+    @uploads_php {
+        path /uploads/*
+        path_regexp ext \.(php\d*|phtml|phps)$
+    }
+    respond @uploads_php 403
+
     reverse_proxy app:80
 
-    # Security headers
+    # ── Security headers ──────────────────────────────────────────────────
     header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
-        Referrer-Policy "strict-origin-when-cross-origin"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options   "nosniff"
+        X-Frame-Options          "DENY"
+        Referrer-Policy          "strict-origin-when-cross-origin"
+        Content-Security-Policy  "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'"
+        # Masquer la stack technique
+        -Server
     }
 
     # Cache static assets aggressively

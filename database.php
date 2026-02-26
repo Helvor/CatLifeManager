@@ -8,7 +8,12 @@ function getDB() {
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $db;
     } catch (PDOException $e) {
-        die("Erreur de connexion : " . $e->getMessage());
+        // Ne pas exposer les détails PDO en production (chemin DB, type, schéma)
+        if (defined('APP_ENV') && APP_ENV === 'development') {
+            die("Erreur de connexion : " . $e->getMessage());
+        }
+        http_response_code(500);
+        die("Erreur interne du serveur. Veuillez réessayer.");
     }
 }
 
@@ -165,6 +170,30 @@ function claimOrphanCats(int $userId): void
     $stmt->execute([$userId]);
 }
 
+// ─── Ownership / Access control ──────────────────────────────────────────────
+
+/** Vérifie qu'un chat appartient à l'utilisateur donné. */
+function catBelongsToUser(int $catId, int $userId): bool
+{
+    $db   = getDB();
+    $stmt = $db->prepare("SELECT 1 FROM cats WHERE id = ? AND user_id = ?");
+    $stmt->execute([$catId, $userId]);
+    return $stmt->fetchColumn() !== false;
+}
+
+/** Vérifie qu'une photo appartient (via son chat) à l'utilisateur donné. */
+function photoBelongsToUser(int $photoId, int $userId): bool
+{
+    $db   = getDB();
+    $stmt = $db->prepare("
+        SELECT 1 FROM photos p
+        JOIN cats c ON p.cat_id = c.id
+        WHERE p.id = ? AND c.user_id = ?
+    ");
+    $stmt->execute([$photoId, $userId]);
+    return $stmt->fetchColumn() !== false;
+}
+
 // ─── Rate limiting ────────────────────────────────────────────────────────────
 
 function logLoginAttempt(string $email, string $ip, bool $success): void
@@ -188,6 +217,28 @@ function countRecentFailedAttempts(string $email, string $ip): int
           AND (email = ? OR ip = ?)
     ");
     $stmt->execute([strtolower(trim($email)), $ip]);
+    return (int) $stmt->fetchColumn();
+}
+
+/** Enregistre une tentative d'inscription (pour le rate limiting). */
+function logRegistrationAttempt(string $ip): void
+{
+    $db   = getDB();
+    $stmt = $db->prepare("INSERT INTO login_attempts (email, ip, success) VALUES (?, ?, 0)");
+    $stmt->execute(['_reg:' . $ip, $ip]);
+}
+
+/** Nombre d'inscriptions récentes depuis cette IP (1 heure glissante). */
+function countRecentRegistrations(string $ip): int
+{
+    $db   = getDB();
+    $stmt = $db->prepare("
+        SELECT COUNT(*) FROM login_attempts
+        WHERE ip = ?
+          AND email LIKE '_reg:%'
+          AND created_at >= datetime('now', '-1 hour')
+    ");
+    $stmt->execute([$ip]);
     return (int) $stmt->fetchColumn();
 }
 

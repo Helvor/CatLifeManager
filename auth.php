@@ -65,3 +65,37 @@ function csrfInput(): string
         . htmlspecialchars(generateCsrfToken(), ENT_QUOTES, 'UTF-8')
         . '">';
 }
+
+// ─── Client IP (proxy-aware) ──────────────────────────────────────────────────
+
+/**
+ * Retourne l'IP réelle du client.
+ * Lorsque l'app est derrière Caddy, l'IP réelle est dans X-Forwarded-For.
+ * ⚠️ Ne faire confiance à ce header QUE si l'app est derrière un proxy de confiance.
+ */
+function getClientIp(): string
+{
+    $xff = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+    if ($xff !== '') {
+        $firstIp = trim(explode(',', $xff)[0]);
+        if (filter_var($firstIp, FILTER_VALIDATE_IP)) {
+            return $firstIp;
+        }
+    }
+    return $_SERVER['REMOTE_ADDR'];
+}
+
+// ─── Timing attack mitigation ─────────────────────────────────────────────────
+
+/**
+ * Hash factice pour toujours appeler password_verify() même si l'email n'existe pas.
+ * Élimine la différence de timing qui permettrait d'énumérer les comptes existants.
+ * Stocké en session afin d'être recalculé une seule fois par session.
+ */
+function getDummyHash(): string
+{
+    if (empty($_SESSION['_dummy_hash'])) {
+        $_SESSION['_dummy_hash'] = password_hash(bin2hex(random_bytes(16)), PASSWORD_ARGON2ID);
+    }
+    return $_SESSION['_dummy_hash'];
+}
