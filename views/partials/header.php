@@ -11,6 +11,14 @@
             </div>
             <div class="header-actions">
                 <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()" title="Basculer le thème" aria-label="Basculer le mode sombre/clair"></button>
+                <?php if (isset($currentUser)): ?>
+                    <span class="header-user">
+                        <?= htmlspecialchars($currentUser['name'], ENT_QUOTES, 'UTF-8') ?>
+                    </span>
+                    <a href="/logout.php" class="btn btn-sm" title="Se déconnecter">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </a>
+                <?php endif; ?>
                 <button class="btn btn-primary btn-sm" onclick="showModal('addCatModal')">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>

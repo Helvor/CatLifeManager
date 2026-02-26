@@ -8,6 +8,7 @@
         <form method="POST">
             <input type="hidden" name="action" value="add_weight">
             <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
+            <?= csrfInput() ?>
 
             <div class="form-group">
                 <label class="form-label">Poids (kg) *</label>

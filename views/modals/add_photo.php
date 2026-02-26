@@ -8,6 +8,7 @@
         <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="add_photo">
             <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
+            <?= csrfInput() ?>
 
             <div class="form-group">
                 <label class="form-label">Photo *</label>

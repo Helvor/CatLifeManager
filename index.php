@@ -1,6 +1,11 @@
 <?php
 require_once 'config.php';
+require_once 'auth.php';
 require_once 'database.php';
+
+requireAuth();
+
+$currentUser = currentUser();
 
 // Handle POST actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -8,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Load data for rendering
-$cats          = getAllCats();
+$cats          = getAllCats($currentUser['id']);
 $selectedCatId = $_GET['cat'] ?? ($cats[0]['id'] ?? null);
 $activeTab     = $_GET['tab'] ?? 'dashboard';
 $selectedCat   = $selectedCatId ? getCatById($selectedCatId) : null;

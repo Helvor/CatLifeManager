@@ -8,6 +8,7 @@
         <form method="POST">
             <input type="hidden" name="action" value="add_treatment">
             <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
+            <?= csrfInput() ?>
 
             <div class="form-group">
                 <label class="form-label">Type de traitement *</label>

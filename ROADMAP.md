@@ -1,7 +1,7 @@
 # CatLife Manager — Product Roadmap
 
 > Last updated: 2026-02-26
-> Current version: 0.3
+> Current version: 0.4
 > Stack: PHP 8.2 · SQLite · Vanilla JS · Custom CSS
 
 ---
@@ -53,13 +53,13 @@ Meta viewport `viewport-fit=cover` + `env(safe-area-inset-*)` dans `style.css`.
 
 ---
 
-## ❌ Phase 2 — Authentication
+## ✅ Phase 2 — Authentication
 
-**Statut : Non démarrée — priorité suivante**
+**Statut : Email/password complète (OAuth prévu en phase suivante)**
 
 **Goal:** Secure the app with multi-user support and three sign-in methods.
 
-### ❌ 2.1 Database Changes
+### ✅ 2.1 Database Changes
 
 Add a `users` table and link cats to users:
 
@@ -79,7 +79,7 @@ CREATE TABLE users (
 ALTER TABLE cats ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
 ```
 
-### ❌ 2.2 Session Management
+### ✅ 2.2 Session Management
 
 Use PHP native sessions secured with regeneration:
 
@@ -102,7 +102,7 @@ function requireAuth(): void {
 
 Add `requireAuth()` at the top of `index.php`.
 
-### ❌ 2.3 Email / Password Authentication
+### ✅ 2.3 Email / Password Authentication
 
 - Hash passwords with `password_hash($pass, PASSWORD_ARGON2ID)`
 - Verify with `password_verify()`
@@ -153,7 +153,7 @@ Apple Developer Console setup:
 
 > Note: Apple only sends the email on the **first** sign-in. Store it immediately.
 
-### ❌ 2.6 Login UI
+### ✅ 2.6 Login UI
 
 Create `views/pages/login.php` and `views/pages/register.php` with:
 - Clean centered card layout
@@ -370,7 +370,7 @@ Introduce a basic test suite with PHPUnit:
 | 3 | UI redesign (couleurs, typo, icônes) | ✅ Fait | Medium | High |
 | 4 | Toast notifications | ✅ Fait | Low | High |
 | 5 | Weight chart | ✅ Fait | Low | Medium |
-| 6 | **Email authentication** | ❌ À faire | Medium | High |
+| 6 | **Email authentication** | ✅ Fait | Medium | High |
 | 7 | **Composer + .env** | ❌ À faire | Low | High |
 | 8 | **Google OAuth** | ❌ À faire | Medium | High |
 | 9 | **Apple Sign In** | ❌ À faire | Medium | Requis iOS |
