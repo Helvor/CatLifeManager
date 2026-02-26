@@ -16,24 +16,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verifyCsrfToken($_POST['_token'] ?? '')) {
         $error = 'Requête invalide. Veuillez réessayer.';
     } else {
-        $name     = trim($_POST['name'] ?? '');
+        $ip   = getClientIp();
+        $name = trim($_POST['name'] ?? '');
         $email    = trim(strtolower($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
         $confirm  = $_POST['password_confirm'] ?? '';
 
-        if (empty($name) || strlen($name) < 2) {
-            $error = 'Le prénom doit contenir au moins 2 caractères.';
+        // Rate limiting : max 5 inscriptions par IP par heure
+        if (countRecentRegistrations($ip) >= 5) {
+            $error = 'Trop de créations de compte depuis cette adresse. Réessayez dans une heure.';
+        } elseif (empty($name) || strlen($name) < 2 || strlen($name) > 100) {
+            $error = 'Le prénom doit contenir entre 2 et 100 caractères.';
+            logRegistrationAttempt($ip);
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error = 'Adresse email invalide.';
+            logRegistrationAttempt($ip);
         } elseif (strlen($password) < 8) {
             $error = 'Le mot de passe doit contenir au moins 8 caractères.';
+        } elseif (strlen($password) > 1000) {
+            // Protection DoS : Argon2ID avec un mot de passe énorme = spike CPU
+            $error = 'Le mot de passe est trop long (maximum 1000 caractères).';
         } elseif ($password !== $confirm) {
             $error = 'Les mots de passe ne correspondent pas.';
         } elseif (getUserByEmail($email)) {
             $error = 'Cette adresse email est déjà utilisée.';
+            logRegistrationAttempt($ip);
         } else {
             $hash   = password_hash($password, PASSWORD_ARGON2ID);
             $userId = createUser($email, $name, $hash);
+            logRegistrationAttempt($ip);
 
             // Réclame les chats orphelins pour le premier utilisateur
             claimOrphanCats($userId);

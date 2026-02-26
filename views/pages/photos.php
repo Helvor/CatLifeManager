@@ -36,7 +36,7 @@
         <div class="photo-masonry">
             <?php foreach ($photos as $photo): ?>
                 <div class="photo-item"
-                     onclick="openLightbox('uploads/<?= htmlspecialchars($photo['filename']) ?>', '<?= htmlspecialchars(addslashes($photo['title'] ?: '')) ?>')">
+                     onclick="openLightbox('uploads/<?= htmlspecialchars($photo['filename']) ?>', '<?= htmlspecialchars($photo['title'] ?: '', ENT_QUOTES, 'UTF-8') ?>')">
 
                     <img src="uploads/<?= htmlspecialchars($photo['filename']) ?>"
                          alt="<?= htmlspecialchars($photo['title'] ?: '') ?>"
@@ -62,6 +62,7 @@
                         <input type="hidden" name="action" value="delete_photo">
                         <input type="hidden" name="photo_id" value="<?= $photo['id'] ?>">
                         <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
+                        <?= csrfInput() ?>
                         <button type="submit" class="photo-delete-btn"
                                 onclick="return confirm('Supprimer cette photo ?')">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">

@@ -48,6 +48,7 @@
     <form id="deleteCatForm" method="POST" style="display: none;">
         <input type="hidden" name="action" value="delete_cat">
         <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
+        <?= csrfInput() ?>
     </form>
 
     <div class="stats-grid">
@@ -116,6 +117,7 @@
                         <input type="hidden" name="action" value="complete_reminder">
                         <input type="hidden" name="reminder_id" value="<?= $reminder['id'] ?>">
                         <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
+                        <?= csrfInput() ?>
                         <button type="submit" class="btn btn-sm btn-success">Fait</button>
                     </form>
                 </div>
