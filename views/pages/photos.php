@@ -58,7 +58,7 @@
                         </div>
                     </div>
 
-                    <form method="POST" onclick="event.stopPropagation();">
+                    <form method="POST" onclick="event.stopPropagation();" data-async>
                         <input type="hidden" name="action" value="delete_photo">
                         <input type="hidden" name="photo_id" value="<?= $photo['id'] ?>">
                         <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">

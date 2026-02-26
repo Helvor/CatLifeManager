@@ -5,7 +5,7 @@
             <h2 class="modal-title">Ajouter une photo</h2>
             <button class="modal-close" onclick="hideModal('addPhotoModal')">&times;</button>
         </div>
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" data-async>
             <input type="hidden" name="action" value="add_photo">
             <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
             <?= csrfInput() ?>

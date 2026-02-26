@@ -5,7 +5,7 @@
             <h2 class="modal-title">Ajouter un chat</h2>
             <button class="modal-close" onclick="hideModal('addCatModal')">&times;</button>
         </div>
-        <form method="POST">
+        <form method="POST" data-async>
             <input type="hidden" name="action" value="add_cat">
             <?= csrfInput() ?>
 

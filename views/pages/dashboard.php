@@ -33,7 +33,7 @@
                     </svg>
                     Modifier
                 </button>
-                <button onclick="if(confirm('Supprimer ce chat définitivement ?')) { document.getElementById('deleteCatForm').submit(); }" class="btn btn-outline btn-sm">
+                <button onclick="if(confirm('Supprimer ce chat définitivement ?')) { document.getElementById('deleteCatForm').requestSubmit(); }" class="btn btn-outline btn-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
                         <path d="M10 11v6"/><path d="M14 11v6"/>
@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <form id="deleteCatForm" method="POST" style="display: none;">
+    <form id="deleteCatForm" method="POST" style="display: none;" data-async>
         <input type="hidden" name="action" value="delete_cat">
         <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
         <?= csrfInput() ?>
@@ -113,7 +113,7 @@
                         <div class="item-title"><?= htmlspecialchars($reminder['title']) ?></div>
                         <div class="item-text"><?= date('d/m/Y', strtotime($reminder['reminder_date'])) ?></div>
                     </div>
-                    <form method="POST" style="display: inline; flex-shrink: 0;">
+                    <form method="POST" style="display: inline; flex-shrink: 0;" data-async>
                         <input type="hidden" name="action" value="complete_reminder">
                         <input type="hidden" name="reminder_id" value="<?= $reminder['id'] ?>">
                         <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">

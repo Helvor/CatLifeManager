@@ -14,6 +14,16 @@ function currentUser(): ?array
 function requireAuth(): void
 {
     if (!currentUser()) {
+        if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch') {
+            http_response_code(401);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success'  => false,
+                'error'    => 'Session expirée. Veuillez vous reconnecter.',
+                'redirect' => '/login.php',
+            ]);
+            exit;
+        }
         header('Location: /login.php');
         exit;
     }

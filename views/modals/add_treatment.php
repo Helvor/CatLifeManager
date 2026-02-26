@@ -5,7 +5,7 @@
             <h2 class="modal-title">Ajouter un traitement</h2>
             <button class="modal-close" onclick="hideModal('addTreatmentModal')">&times;</button>
         </div>
-        <form method="POST">
+        <form method="POST" data-async>
             <input type="hidden" name="action" value="add_treatment">
             <input type="hidden" name="cat_id" value="<?= htmlspecialchars($selectedCatId ?? '') ?>">
             <?= csrfInput() ?>
