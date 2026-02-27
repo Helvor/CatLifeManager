@@ -11,9 +11,21 @@ $dotenv->safeLoad();
 define('APP_ENV', $_ENV['APP_ENV'] ?? 'development');
 define('APP_URL', $_ENV['APP_URL'] ?? 'http://localhost');
 
-define('DB_PATH',    $_ENV['DB_PATH']    ?: __DIR__ . '/database/catlife.db');
-define('UPLOAD_DIR', $_ENV['UPLOAD_DIR'] ?: __DIR__ . '/uploads/');
+define('DB_PATH',    $_ENV['DB_PATH']    ?? __DIR__ . '/database/catlife.db');
+define('UPLOAD_DIR', $_ENV['UPLOAD_DIR'] ?? __DIR__ . '/uploads/');
 define('MAX_UPLOAD_SIZE', 10 * 1024 * 1024); // 10 MB
+
+// ─── Timezone ──────────────────────────────────────────────────────────────
+date_default_timezone_set('Europe/Brussels');
+
+// ─── Erreurs (dev uniquement) ──────────────────────────────────────────────
+if (APP_ENV === 'development') {
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
+} else {
+    ini_set('display_errors', 0);
+    error_reporting(0);
+}
 
 // ─── Session ───────────────────────────────────────────────────────────────
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -27,18 +39,6 @@ session_set_cookie_params([
     'samesite' => 'Lax',
 ]);
 session_start();
-
-// ─── Timezone ──────────────────────────────────────────────────────────────
-date_default_timezone_set('Europe/Brussels');
-
-// ─── Erreurs (dev uniquement) ──────────────────────────────────────────────
-if (APP_ENV === 'development') {
-    ini_set('display_errors', 1);
-    error_reporting(E_ALL);
-} else {
-    ini_set('display_errors', 0);
-    error_reporting(0);
-}
 
 // ─── Security headers (fallback si Caddy n'est pas devant l'app) ───────────
 // Caddy les pose en production via Caddyfile. On les ajoute ici pour le dev HTTP.
